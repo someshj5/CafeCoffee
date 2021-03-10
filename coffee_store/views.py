@@ -2,12 +2,13 @@ from django.shortcuts import render
 
 # Create your views here.
 from .models import *
-from django.views import View
+# from django.views import View
 from django.http import HttpResponse, JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import renderer_classes, api_view
 from .serializers import *
 from rest_framework.response import Response
+from django.core import serializers
 
 
 @api_view(['GET', 'POST'])
@@ -24,7 +25,6 @@ def function(request):
         'data': []
     }
     if request.method == 'GET':
-        # coffee_store_list = list(coffee_store.objects.all())
         menu = Menu.objects.all()
         total_count = len(menu)
         serializers = MenuSerializer(menu, many=True)
@@ -45,6 +45,23 @@ def function(request):
         return Response(serializer.errors, status=400)
 
 
+@api_view(['GET'])
+def item_list(request):
+    response = {
+        'success': False,
+        'message': 'something went wrong ',
+        'data': []
+    }
+
+    item = Item.objects.select_related('menu').all()
+    serialized = ItemSerializer(item,many=True)
+    response['success'] = True
+    response['message'] = 'successfull'
+    response['data'] = serialized.data
+    return Response(response, status=200)
+
+
+
 @api_view(['GET', 'POST'])
 def coffee_list(request):
     """This function is related to coffe_store table data
@@ -58,7 +75,7 @@ def coffee_list(request):
         'data': []
     }
     if request.method == 'GET':
-        coffee_store_list = coffee_store.objects.prefetch_related('amenities')
+        coffee_store_list = coffee_store.objects.prefetch_related('amenities').all()
         total_count = len(coffee_store_list)
         serializer = CoffeeSerializer(coffee_store_list, many=True)
         response['success'] = True

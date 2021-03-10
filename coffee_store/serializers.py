@@ -30,7 +30,6 @@ class CoffeeSerializer(serializers.ModelSerializer):
         depth = 1
 
     def create(self, validated_data):
-        print('under create method of COffeeSerializeres', validated_data)
         return coffee_store.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
@@ -56,3 +55,19 @@ class MenuSerializer(serializers.Serializer):
         instance.name = validated_data.get('name', instance.name)
         instance.save()
         return instance
+
+class ItemSerializer(serializers.ModelSerializer):
+    menu = MenuSerializer()
+
+    class Meta:
+        model = Item
+        fields = ('id','name','calories','price','menu',)
+        # fields = "__all__"
+  
+    # def create(self, validated_data):
+    #     return Item.objects.create(**validated_data)
+
+    # def update(self, instance, validated_data):
+    #     instance.name = validated_data.get('name', instance.name)
+    #     instance.save()
+    #     return instance
